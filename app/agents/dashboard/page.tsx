@@ -89,6 +89,13 @@ export default function DashboardPage() {
   const [referralCode, setReferralCode] = useState("");
   const [referralCount, setReferralCount] = useState(0);
   const [referralCopied, setReferralCopied] = useState(false);
+  const [importName, setImportName] = useState("");
+  const [importRating, setImportRating] = useState(0);
+  const [importBody, setImportBody] = useState("");
+  const [importAddress, setImportAddress] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importSuccess, setImportSuccess] = useState(false);
+  const [importError, setImportError] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -170,6 +177,61 @@ export default function DashboardPage() {
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+  }
+
+  async function handleImportReview() {
+    if (!importBody || importRating === 0) return;
+    setImporting(true);
+    setImportError("");
+
+    const TRAIT_CHIPS = ["low-key","honest","patient","fast responder","data nerd","knew the area","no pressure","great communicator","will tell you to walk away","first-timer friendly"];
+
+    let autoChips: string[] = [];
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 200,
+          system: `You are a review tagging assistant. Given a real estate agent review, select the most relevant tags from this list that the review supports: ${TRAIT_CHIPS.join(", ")}. Return ONLY a JSON array of matching tags, no preamble, no markdown. Example: ["patient","great communicator"]`,
+          messages: [{ role: "user", content: importBody }]
+        })
+      });
+      const data = await res.json();
+      const text = data.content?.filter((b: any) => b.type === "text").map((b: any) => b.text).join("") || "";
+      const match = text.match(/\[[\s\S]*?\]/);
+      if (match) autoChips = JSON.parse(match[0]);
+    } catch {
+      // chips optional — continue without them
+    }
+
+    const { error } = await supabase.from("reviews").insert({
+      agent_id: agentId,
+      token: Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2),
+      client_name: importName || "Zillow reviewer",
+      client_phone: "imported",
+      address: importAddress || null,
+      rating: importRating,
+      trait_chips: autoChips,
+      body: importBody,
+      geo_label: "Zillow import",
+      completed_at: new Date().toISOString(),
+    });
+
+    if (error) {
+      setImportError("Something went wrong: " + error.message);
+    } else {
+      setImportSuccess(true);
+      setImportName("");
+      setImportRating(0);
+      setImportBody("");
+      setImportAddress("");
+      const { data: reviewData } = await supabase.from("reviews").select("*").eq("agent_id", agentId).order("created_at", { ascending: false });
+      setReviews(reviewData || []);
+      setTimeout(() => setImportSuccess(false), 4000);
+    }
+    setImporting(false);
   }
 
   async function handleSendReview() {
@@ -291,11 +353,11 @@ export default function DashboardPage() {
             </button>
           </div>
         )}
-        {referralCode {slug && ({slug && ( (
+        {referralCode && (
           <div className="bg-white border border-black/[0.08] rounded-2xl p-5 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium text-[#1a1918]">your referral link</h3>
-              {referralCount > 0 {slug && ({slug && ( (
+              {referralCount > 0 && (
                 <span className="text-xs bg-[#EAF3DE] text-[#3B6D11] border border-[#3B6D11]/20 rounded-full px-3 py-1">
                   {referralCount} {referralCount === 1 ? "agent" : "agents"} joined
                 </span>
@@ -306,14 +368,14 @@ export default function DashboardPage() {
                 meetmyagent.app/join?ref={referralCode}
               </div>
               <button onClick={() => { navigator.clipboard.writeText("https://meetmyagent.app/join?ref=" + referralCode); setReferralCopied(true); setTimeout(() => setReferralCopied(false), 2000); }}
-                className="shrink-0 px-4 py-2 text-sm rounded-lg border border-black/[0.08] bg-white hover:bg-[#f7f5f0] transition-colors">
+                className="shrink-0 px-4 py-2 text-sm rounded-lg bg-[#D85A30] hover:bg-[#993C1D] text-white font-medium transition-colors">
                 {referralCopied ? "copied! ✓" : "copy"}
               </button>
             </div>
             <p className="mt-3 text-xs text-[#9f9e99]">share this with other agents — you will get credit and a notification when they join</p>
           </div>
         )}
-        {slug {slug && ({slug && ( (
+        {slug && (
           <div className="bg-[#1a1918] rounded-2xl p-4 mb-6 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-white">your public profile is live</p>
@@ -614,6 +676,49 @@ export default function DashboardPage() {
           {saving ? "Saving..." : saved ? "Saved ✓" : "Save profile"}
         </button>
 
+        <div className="bg-white border border-black/[0.08] rounded-2xl p-6 mb-6">
+          <h2 className="text-base font-medium mb-1 text-[#1a1918]">import a zillow review</h2>
+          <p className="text-sm text-[#6b6a65] mb-5">paste a review from Zillow — we will auto-tag it and add it to your profile</p>
+          <div className="mb-4">
+            <label className="text-xs font-medium text-[#1a1918] block mb-1.5">reviewer name</label>
+            <input type="text" value={importName} onChange={e => setImportName(e.target.value)} placeholder="e.g. betht1298" className="w-full px-3 py-2.5 rounded-lg border border-black/[0.1] bg-[#f7f5f0] text-sm text-[#1a1918] focus:outline-none focus:border-[#D85A30]" />
+          </div>
+          <div className="mb-4">
+            <label className="text-xs font-medium text-[#1a1918] block mb-1.5">star rating</label>
+            <div className="flex gap-2">
+              {[1,2,3,4,5].map(star => (
+                <button key={star} onClick={() => setImportRating(star)}
+                  className={"text-3xl transition-transform hover:scale-110 " + (star <= importRating ? "text-[#D85A30]" : "text-black/15")}>
+                  ★
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="mb-4">
+            <label className="text-xs font-medium text-[#1a1918] block mb-1.5">review text</label>
+            <textarea value={importBody} onChange={e => setImportBody(e.target.value)} rows={4}
+              placeholder="Paste the full review text from Zillow here..."
+              className="w-full px-3 py-2.5 rounded-lg border border-black/[0.1] bg-[#f7f5f0] text-sm text-[#1a1918] focus:outline-none focus:border-[#D85A30] resize-none" />
+          </div>
+          <div className="mb-4">
+            <label className="text-xs font-medium text-[#1a1918] block mb-1.5">property address (optional)</label>
+            <input type="text" value={importAddress} onChange={e => setImportAddress(e.target.value)} placeholder="123 Main St, Austin" className="w-full px-3 py-2.5 rounded-lg border border-black/[0.1] bg-[#f7f5f0] text-sm text-[#1a1918] focus:outline-none focus:border-[#D85A30]" />
+          </div>
+          {importSuccess && (
+            <div className="bg-[#EAF3DE] border border-[#3B6D11]/20 rounded-xl p-4 mb-4">
+              <p className="text-sm font-medium text-[#3B6D11]">Review imported and added to your profile ✓</p>
+            </div>
+          )}
+          {importError && (
+            <div className="bg-[#FCEBEB] border border-[#A32D2D]/20 rounded-xl p-4 mb-4">
+              <p className="text-sm font-medium text-[#A32D2D]">{importError}</p>
+            </div>
+          )}
+          <button onClick={handleImportReview} disabled={importing || !importBody || importRating === 0}
+            className="w-full py-3 rounded-xl bg-[#1a1918] hover:bg-black disabled:opacity-40 text-white font-medium text-sm">
+            {importing ? "Importing..." : "import review →"}
+          </button>
+        </div>
         <div className="bg-white border border-black/[0.08] rounded-2xl p-6 mb-6">
           <h2 className="text-base font-medium mb-1 text-[#1a1918]">request a review</h2>
           <p className="text-sm text-[#1a1918] mb-5">enter your client info — we will generate a review link you can send them</p>

@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     const { newAgentId, newAgentName } = await req.json();
     if (!newAgentId) return NextResponse.json({ error: "newAgentId required" }, { status: 400 });
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const referralCode = cookieStore.get("referral_code")?.value;
     if (!referralCode) return NextResponse.json({ message: "no referral code" });
 
