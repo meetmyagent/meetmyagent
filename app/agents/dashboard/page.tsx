@@ -179,6 +179,55 @@ export default function DashboardPage() {
     setTimeout(() => setSaved(false), 3000);
   }
 
+  async function handleGenerateBio() {
+    if (!name) return;
+    setGeneratingBio(true);
+    try {
+      const context = [
+        name && `Agent name: ${name}`,
+        yearsExp && `Years of experience: ${yearsExp}`,
+        city && `Primary market: ${city}`,
+        communicationStyle && `Communication style: ${communicationStyle}`,
+        decisionStyle && `Decision support style: ${decisionStyle}`,
+        stressResponse && `Under stress: ${stressResponse}`,
+        paceStyle && `Natural pace: ${paceStyle}`,
+        styleTags.length > 0 && `Working style tags: ${styleTags.join(", ")}`,
+        clientTags.length > 0 && `Works best with: ${clientTags.join(", ")}`,
+        designations.length > 0 && `Designations: ${designations.join(", ")}`,
+      ].filter(Boolean).join("\n");
+
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 300,
+          system: `You write agent bios for meetmyagent.app — a personality-matching platform for real estate. Bios here are different: no corporate fluff, no "passionate about helping clients find their dream home." They are direct, specific, and human. They tell consumers exactly who this agent is and how they work.
+
+Rules:
+- 2-3 sentences max
+- First person
+- Lead with what makes them distinctly THEM — their energy, pace, approach
+- Mention their market/city naturally if provided
+- Reference their working style or who they work best with
+- No clichés: no "passionate", "dedicated", "dream home", "going above and beyond"
+- Tone: confident, warm, real — like they're talking to a friend
+- End with something that signals who they are NOT for (optional but powerful)
+
+Example of the right tone:
+"I move fast and I tell it like it is — if a house isn't right for you, I'll say so. I've spent 8 years in South Austin and know every street. Best fit for buyers who want an honest opinion, not someone to just agree with everything they say."`,
+          messages: [{ role: "user", content: `Write a bio for this agent:\n${context}` }]
+        })
+      });
+      const data = await res.json();
+      const text = data.content?.filter((b: any) => b.type === "text").map((b: any) => b.text).join("") || "";
+      if (text) setBio(text.trim());
+    } catch (e) {
+      console.error("Bio generation failed", e);
+    }
+    setGeneratingBio(false);
+  }
+
   async function handleImportReview() {
     if (!importBody || importRating === 0) return;
     setImporting(true);
@@ -442,6 +491,11 @@ export default function DashboardPage() {
           <div>
             <label className="text-xs font-medium text-[#1a1918] block mb-1.5">your bio</label>
             <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} placeholder="Skip the sales pitch, be real..." className="w-full px-3 py-2.5 rounded-lg border border-black/[0.1] bg-[#f7f5f0] text-sm text-[#1a1918] focus:outline-none focus:border-[#D85A30] resize-none" />
+            <button onClick={handleGenerateBio} disabled={generatingBio || !name}
+              className="mt-2 text-xs font-medium text-[#D85A30] hover:text-[#993C1D] disabled:opacity-40 flex items-center gap-1.5">
+              {generatingBio ? "Writing your bio..." : "✦ write my bio with AI"}
+            </button>
+            {!name && <p className="text-xs text-[#9f9e99] mt-1">add your name above first</p>}
           </div>
           <div className="mt-4">
             <label className="text-xs font-medium text-[#1a1918] block mb-1.5">intro video (optional)</label>
