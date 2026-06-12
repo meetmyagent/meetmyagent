@@ -24,17 +24,18 @@ export default function ConsumerDashboard() {
     if (!email) return;
     setLoading(true);
     setError("");
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("consumer_profiles")
-      .select("*")
-      .eq("email", email.toLowerCase().trim())
-      .single();
-    if (!data) {
+    const res = await fetch("/api/consumer-lookup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) {
       setError("No profile found for that email. Take the quiz first!");
       setLoading(false);
       return;
     }
+    const json = await res.json();
+    const data = json.profile;
     setProfile(data);
 
     if (data.session_id) {
