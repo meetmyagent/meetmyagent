@@ -36,6 +36,7 @@ export default function ConsumerDashboard() {
     }
     const json = await res.json();
     const data = json.profile;
+    const supabase = createClient();
     setProfile(data);
 
     if (data.session_id) {
