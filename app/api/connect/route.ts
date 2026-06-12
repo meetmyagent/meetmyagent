@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       const openingLine = buyerType ? await getAiOpeningLine(consumerName, buyerType, matchScore) : "";
 
       await resend.emails.send({
-        from: "Meet My Agent <hello@meetmyagent.app>",
+        from: "Meet My Agent <hello@meetmyagentemail.com>",
         to: agentEmail,
         subject: `${consumerName} wants to connect · ${matchScore}% match`,
         html: `
