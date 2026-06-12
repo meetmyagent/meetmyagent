@@ -4,7 +4,7 @@
 
 const SUPABASE_URL = "https://sfmtwcjwjmpbunvqoazg.supabase.co";
 const SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmbXR3Y2p3am1wYnVudnFvYXpnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTk3NTY5OSwiZXhwIjoyMDk1NTUxNjk5fQ.YGKQDQNm38zZwclRlnch8BhtI5_BwzsIdpnFdUtqyVQ"; // Settings > API > service_role key
-const HUBSPOT_TOKEN = "pat-na2-8c67eecc-d8a7-453d-8156-25f9216ecf78";
+const HUBSPOT_TOKEN = process.env.HUBSPOT_ACCESS_TOKEN;
 
 async function fetchAgents() {
   console.log("📦 Fetching agents from Supabase...");
