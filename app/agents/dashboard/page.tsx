@@ -96,6 +96,9 @@ export default function DashboardPage() {
   const [importing, setImporting] = useState(false);
   const [importSuccess, setImportSuccess] = useState(false);
   const [importError, setImportError] = useState("");
+  const [brokerName, setBrokerName] = useState("");
+  const [licenseNumber, setLicenseNumber] = useState("");
+  const [brokerLogoUrl, setBrokerLogoUrl] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -124,6 +127,9 @@ export default function DashboardPage() {
         setDesignations(data.designations || []);
         setReferralCode(data.referral_code || "");
         setReferralCount(data.referral_count || 0);
+        setBrokerName(data.broker_name || "");
+        setLicenseNumber(data.license_number || "");
+        setBrokerLogoUrl(data.broker_logo_url || "");
       }
       const { data: reviewData } = await supabase.from("reviews").select("*").eq("agent_id", user.id).order("created_at", { ascending: false });
       const { data: connectionData } = await supabase.from("connections").select("*").eq("agent_id", user.id).order("created_at", { ascending: false });
@@ -172,7 +178,7 @@ export default function DashboardPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     const newSlug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") + "-" + user.id.slice(0, 4);
-    await supabase.from("agents").upsert({ id: user.id, name, slug: newSlug, bio, city, years_exp: parseInt(yearsExp) || 0, style_tags: styleTags, client_tags: clientTags, area_tags: areaTags, avatar_url: avatarUrl, communication_style: communicationStyle, decision_style: decisionStyle, stress_response: stressResponse, pace_style: paceStyle, agent_type: agentType, commercial_specialties: commercialSpecialties, deal_size_range: dealSizeRange, video_url: videoUrl, designations: designations });
+    await supabase.from("agents").upsert({ id: user.id, name, slug: newSlug, bio, city, years_exp: parseInt(yearsExp) || 0, style_tags: styleTags, client_tags: clientTags, area_tags: areaTags, avatar_url: avatarUrl, communication_style: communicationStyle, decision_style: decisionStyle, stress_response: stressResponse, pace_style: paceStyle, agent_type: agentType, commercial_specialties: commercialSpecialties, deal_size_range: dealSizeRange, video_url: videoUrl, designations: designations, broker_name: brokerName, license_number: licenseNumber, broker_logo_url: brokerLogoUrl });
     setSlug(newSlug);
     setSaving(false);
     setSaved(true);
@@ -483,6 +489,20 @@ Example of the right tone:
               <label className="text-xs font-medium text-[#1a1918] block mb-1.5">years of experience</label>
               <input type="number" value={yearsExp} onChange={e => setYearsExp(e.target.value)} placeholder="7" className="w-full px-3 py-2.5 rounded-lg border border-black/[0.1] bg-[#f7f5f0] text-sm text-[#1a1918] focus:outline-none focus:border-[#D85A30]" />
             </div>
+          </div>
+          <div className="bg-[#fff8f0] border border-[#D85A30]/20 rounded-xl p-4 mb-4">
+            <p className="text-xs font-semibold text-[#D85A30] uppercase tracking-widest mb-3">license & brokerage — required</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-medium text-[#1a1918] block mb-1.5">sponsoring broker name <span className="text-[#D85A30]">*</span></label>
+                <input type="text" value={brokerName} onChange={e => setBrokerName(e.target.value)} placeholder="Keller Williams Realty" className="w-full px-3 py-2.5 rounded-lg border border-black/[0.1] bg-[#f7f5f0] text-sm text-[#1a1918] focus:outline-none focus:border-[#D85A30]" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-[#1a1918] block mb-1.5">agent license number <span className="text-[#D85A30]">*</span></label>
+                <input type="text" value={licenseNumber} onChange={e => setLicenseNumber(e.target.value)} placeholder="TX-12345678" className="w-full px-3 py-2.5 rounded-lg border border-black/[0.1] bg-[#f7f5f0] text-sm text-[#1a1918] focus:outline-none focus:border-[#D85A30]" />
+              </div>
+            </div>
+            <p className="text-xs text-[#9f9e99] mt-2">Your profile will not appear in search results until both fields are completed.</p>
           </div>
           <div className="mb-4">
             <label className="text-xs font-medium text-[#1a1918] block mb-1.5">primary city</label>

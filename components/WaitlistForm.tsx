@@ -35,7 +35,7 @@ export default function WaitlistForm() {
       <div className="bg-white/10 border border-white/20 rounded-2xl p-6 text-center">
         <div className="text-3xl mb-3">🎉</div>
         <p className="text-white font-medium text-lg mb-1">You are in as a founding agent.</p>
-        <p className="text-white/60 text-sm">Check your email — we sent you a confirmation. We will reach out personally within 24 hours.</p>
+        <p className="text-white/60 text-sm">Check your email — we sent you a magic link to build your profile right now. Takes about 10 minutes.</p>
       </div>
     );
   }

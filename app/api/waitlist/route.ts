@@ -80,6 +80,30 @@ export async function POST(req: NextRequest) {
       `,
     });
 
+    // Add to HubSpot as a contact
+    try {
+      await fetch("https://api.hubapi.com/crm/v3/objects/contacts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+        },
+        body: JSON.stringify({
+          properties: {
+            email: email.toLowerCase().trim(),
+            firstname: name?.split(" ")[0] || "",
+            lastname: name?.split(" ").slice(1).join(" ") || "",
+            city: city || "",
+            hs_lead_status: "NEW",
+            lifecyclestage: "lead",
+          },
+        }),
+      });
+    } catch (hubspotErr) {
+      console.error("HubSpot sync failed:", hubspotErr);
+      // Don't block signup if HubSpot fails
+    }
+
     return NextResponse.json({ message: "success" }, { status: 201 });
   } catch (err) {
     console.error("Waitlist error:", err);

@@ -54,17 +54,17 @@ export default function AgentProfileClient({ agent, reviews, responseBadge, styl
               <h1 className="text-3xl font-medium text-[#1a1918] mb-1">{agent.name}</h1>
               <p className="text-[#9f9e99] text-sm mb-3">{agent.years_exp} yrs · {agent.city}</p>
               <div className="flex flex-wrap gap-2">
-                {responseBadge && (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-[#D85A30]/10 text-[#D85A30] border border-[#D85A30]/20 px-3 py-1 rounded-lg">
-                    {responseBadge}
-                  </span>
-                )}
                 {agent.is_founding && (
                   <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-[#1a1918] text-white px-3 py-1 rounded-lg">✦ founding agent</span>
                 )}
-                {agent.agent_type && agent.agent_type !== "residential" && (
+                {agent.agent_type && (
                   <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-[#D85A30]/10 text-[#D85A30] border border-[#D85A30]/20 px-3 py-1 rounded-lg">
-                    {agent.agent_type === "both" ? "Residential & Commercial" : "Commercial Real Estate"}
+                    {agent.agent_type === "both" ? "Residential & Commercial" : agent.agent_type === "commercial" ? "Commercial Real Estate" : "Residential"}
+                  </span>
+                )}
+                {responseBadge && (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-[#D85A30]/10 text-[#D85A30] border border-[#D85A30]/20 px-3 py-1 rounded-lg">
+                    {responseBadge}
                   </span>
                 )}
               </div>

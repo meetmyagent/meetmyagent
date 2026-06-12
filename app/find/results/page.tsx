@@ -117,7 +117,7 @@ function ResultsContent() {
 
       const isCommercial = quiz.consumer_type === "commercial";
 
-      let agentQuery = supabase.from("agents").select("*").not("name", "is", null);
+      let agentQuery = supabase.from("agents").select("*").not("name", "is", null).not("broker_name", "is", null).not("license_number", "is", null);
       if (isCommercial) {
         agentQuery = agentQuery.in("agent_type", ["commercial", "both"]);
       } else {
