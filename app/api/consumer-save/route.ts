@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     }, { onConflict: "email" });
 
     await resend.emails.send({
-      from: "Meet My Agent <hello@meetmyagent.app>",
+      from: "Meet My Agent <hello@meetmyagentemail.com>",
       to: email,
       subject: firstName ? "your matches are ready, " + firstName + "!" : "your matches are ready!",
       html: `

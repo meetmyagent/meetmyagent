@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     const magicLink = linkData?.properties?.action_link || "https://www.meetmyagent.app/login";
 
     await resend.emails.send({
-      from: "Lindsey at Meet My Agent <hello@meetmyagent.app>",
+      from: "Lindsey at Meet My Agent <hello@meetmyagentemail.com>",
       to: email,
       subject: "you signed up — here is what happens next",
       html: `

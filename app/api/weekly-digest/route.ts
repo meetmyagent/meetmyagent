@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
       const firstName = agent.name?.split(" ")[0] || "there";
 
       await resend.emails.send({
-        from: "Meet My Agent <hello@meetmyagent.app>",
+        from: "Meet My Agent <hello@meetmyagentemail.com>",
         to: agent.email,
         subject: "your week on Meet My Agent",
         html: `

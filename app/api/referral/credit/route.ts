@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
     if (referrer.email) {
       await resend.emails.send({
-        from: "meetmyagent.app <hello@meetmyagent.app>",
+        from: "meetmyagent.app <hello@meetmyagentemail.com>",
         to: referrer.email,
         subject: "Someone joined through your link!",
         html: `

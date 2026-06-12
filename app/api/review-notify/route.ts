@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     if (!agentEmail) return NextResponse.json({ error: "Missing agent email" }, { status: 400 });
 
     await resend.emails.send({
-      from: "Meet My Agent <hello@meetmyagent.app>",
+      from: "Meet My Agent <hello@meetmyagentemail.com>",
       to: agentEmail,
       subject: "You received a new review on meetmyagent.app",
       html: `
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
             ${body ? `<p style="font-size:14px;color:#1a1918;line-height:1.6;margin:0;">"${body}"</p>` : ""}
           </div>
           <a href="https://meetmyagent.app/agents/dashboard" style="display:inline-block;background:#D85A30;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:500;">view your profile</a>
-          <p style="font-size:12px;color:#9f9e99;margin:24px 0 0;">questions? hello@meetmyagent.app</p>
+          <p style="font-size:12px;color:#9f9e99;margin:24px 0 0;">questions? hello@meetmyagentemail.com</p>
         </div>
       `,
     });
