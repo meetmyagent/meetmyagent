@@ -117,7 +117,7 @@ function ResultsContent() {
 
       const isCommercial = quiz.consumer_type === "commercial";
 
-      let agentQuery = supabase.from("agents").select("*").not("name", "is", null).not("broker_name", "is", null).not("license_number", "is", null);
+      let agentQuery = supabase.from("agents").select("*").not("name", "is", null);
       if (isCommercial) {
         agentQuery = agentQuery.in("agent_type", ["commercial", "both"]);
       } else {
@@ -128,7 +128,7 @@ function ResultsContent() {
       if (allAgents) {
         const scored = allAgents
           .map(agent => ({ ...agent, matchScore: scoreAgent(agent, quiz.derived_tags || []) }))
-          .filter(a => a.matchScore > 0)
+          
           .sort((a, b) => b.matchScore - a.matchScore);
         setAgents(scored);
       }
