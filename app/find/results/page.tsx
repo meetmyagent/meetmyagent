@@ -61,8 +61,6 @@ function ResultsContent() {
   const [consumerEmail, setConsumerEmail] = useState("");
   const [consumerPhone, setConsumerPhone] = useState("");
   const [compareList, setCompareList] = useState<any[]>([]);
-  const [agentIntro, setAgentIntro] = useState<Record<string, string>>({});
-  const [introLoading, setIntroLoading] = useState<string | null>(null);
   const [showPersonalityDetail, setShowPersonalityDetail] = useState(false);
   const [areaFilter, setAreaFilter] = useState("all");
 
@@ -156,20 +154,6 @@ function ResultsContent() {
     });
   }
 
-  async function fetchAgentIntro(agent: any) {
-    if (agentIntro[agent.id]) return;
-    setIntroLoading(agent.id);
-    try {
-      const res = await fetch("/api/ai-agent-intro", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agent, consumerTags, buyerType: buyerType?.title }),
-      });
-      const data = await res.json();
-      if (data.intro) setAgentIntro(prev => ({ ...prev, [agent.id]: data.intro }));
-    } catch {}
-    setIntroLoading(null);
-  }
 
   async function handleConnect(agent: any) {
     if (!consumerName || !consumerEmail) return;

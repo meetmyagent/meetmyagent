@@ -8,6 +8,11 @@ const supabase = createClient(
 );
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
 const BUYER_TYPE_BRIEFS: Record<string, { how: string; tip: string }> = {
   "The Fast Mover": {
     how: "Moves quickly and decisively. Already knows what they want.",
@@ -41,7 +46,7 @@ async function getAiOpeningLine(consumerName: string, buyerType: string, matchSc
         max_tokens: 100,
         messages: [{
           role: "user",
-          content: `Write a single opening text message an agent should send to a new lead named ${consumerName}. They are "${buyerType}" personality type and a ${matchScore}% match. Keep it under 25 words. Warm, direct, no sales language. Just a natural first message.`,
+          content: `Write a single opening text message an agent should send to a new lead named ${escapeHtml(consumerName ?? "")}. They are "${buyerType}" personality type and a ${matchScore}% match. Keep it under 25 words. Warm, direct, no sales language. Just a natural first message.`,
         }],
       }),
     });
@@ -76,20 +81,20 @@ export async function POST(req: NextRequest) {
       await resend.emails.send({
         from: "Meet My Agent <hello@meetmyagentemail.com>",
         to: agentEmail,
-        subject: `${consumerName} wants to connect · ${matchScore}% match`,
+        subject: `${escapeHtml(consumerName ?? "")} wants to connect · ${matchScore}% match`,
         html: `
           <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f7f5f0;">
 
             <div style="background:#1a1918;border-radius:16px;padding:32px;margin-bottom:16px;">
               <p style="color:#D85A30;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin:0 0 8px;">new connection</p>
-              <h1 style="color:white;font-size:24px;font-weight:500;margin:0 0 4px;">${consumerName} wants to work with you</h1>
+              <h1 style="color:white;font-size:24px;font-weight:500;margin:0 0 4px;">${escapeHtml(consumerName ?? "")} wants to work with you</h1>
               <p style="color:rgba(255,255,255,0.4);font-size:14px;margin:0;">${matchScore}% personality match${readinessScore ? " · " + readinessScore : ""}</p>
             </div>
 
             <div style="background:white;border-radius:12px;padding:20px;margin-bottom:12px;">
               <p style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9f9e99;margin:0 0 12px;">contact info</p>
-              ${consumerEmail ? `<p style="font-size:14px;margin:0 0 6px;color:#1a1918;"><strong>Email:</strong> <a href="mailto:${consumerEmail}" style="color:#D85A30;">${consumerEmail}</a></p>` : ""}
-              ${consumerPhone ? `<p style="font-size:14px;margin:0;color:#1a1918;"><strong>Phone:</strong> ${consumerPhone}</p>` : ""}
+              ${consumerEmail ? `<p style="font-size:14px;margin:0 0 6px;color:#1a1918;"><strong>Email:</strong> <a href="mailto:${escapeHtml(consumerEmail ?? "")}" style="color:#D85A30;">${escapeHtml(consumerEmail ?? "")}</a></p>` : ""}
+              ${consumerPhone ? `<p style="font-size:14px;margin:0;color:#1a1918;"><strong>Phone:</strong> ${escapeHtml(consumerPhone ?? "")}</p>` : ""}
             </div>
 
             ${buyerType ? `
@@ -109,7 +114,7 @@ export async function POST(req: NextRequest) {
             ${matchExplanation ? `
             <div style="background:white;border-radius:12px;padding:20px;margin-bottom:12px;">
               <p style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9f9e99;margin:0 0 8px;">why you matched</p>
-              <p style="font-size:13px;color:#6b6a65;margin:0;line-height:1.6;">${matchExplanation}</p>
+              <p style="font-size:13px;color:#6b6a65;margin:0;line-height:1.6;">${escapeHtml(matchExplanation ?? "")}</p>
             </div>
             ` : ""}
 
